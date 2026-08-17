@@ -26,7 +26,7 @@ const { constants } = require("./constant");
 app.get('/',(req, res)=>{
     const healthInfo = {
     appName: 'KnowAllEdge API',
-    status: 'running',
+    status: 'Running',
     uptime: process.uptime().toFixed(2) + ' seconds',
     environment: process.env.NODE_ENV || 'development'
   };
