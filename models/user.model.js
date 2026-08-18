@@ -57,6 +57,11 @@ const userdetailSchema = new mongoose.Schema(
       type: [String], 
       default: [],
     },
+    savedNews: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "News",
+      default: [],
+    }],
      profilePic: {
         type: String,
         default: "https://cdn-icons-png.flaticon.com/512/9131/9131529.png",

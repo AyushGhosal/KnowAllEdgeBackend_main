@@ -572,6 +572,8 @@ exports.createNews = async (req, res) => {
     }
 
     // ✅ Create News
+    const safeDate = normalizeNewsDate(date);
+
     const news = await News.create({
       heading,
       subHeading,
@@ -581,7 +583,7 @@ exports.createNews = async (req, res) => {
       contentType,
       topics,
       contentFor,
-      date,
+      date: safeDate,
     });
 
     res.status(201).json({ success: true, data: news });
@@ -674,7 +676,7 @@ exports.updateNews = async (req, res) => {
     news.largeContent = largeContent || news.largeContent;
     news.contentType = contentType || news.contentType;
     news.contentFor = contentFor || news.contentFor;
-    news.date = date || news.date;
+    news.date = typeof date !== "undefined" ? normalizeNewsDate(date) : news.date;
     news.topics = topics;
     news.images = updatedImages;
 

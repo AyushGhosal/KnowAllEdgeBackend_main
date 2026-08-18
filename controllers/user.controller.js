@@ -17,6 +17,7 @@ const News = require('../models/news.model');
 const Trivia = require('../models/trivia.model');
 const Event=require("../models/event.model")
 const Score=require("../models/score.model")
+const { toggleSavedNewsIds } = require('../utils/newsSaveHelpers');
 
 //user signup
 exports.registerUser = async (req, res) => {
@@ -665,9 +666,18 @@ exports.getUserFeedCursor = async (req, res) => {
         : lastItem.data?.updatedAt?.toISOString() || null
       : null;
 
+    const savedNewsIds = (user.savedNews || []).map((id) => String(id));
+    const enrichedFeed = feed.map((item) => {
+      if (!item || item.type === "trivia") return item;
+      return {
+        ...item,
+        liked: savedNewsIds.includes(String(item._id)),
+      };
+    });
+
     res.status(200).json({
       success: true,
-      feed,
+      feed: enrichedFeed,
       nextCursor,
     });
   } catch (error) {
@@ -677,6 +687,51 @@ exports.getUserFeedCursor = async (req, res) => {
       message: "Failed to fetch feed",
       error: error.message,
     });
+  }
+};
+
+exports.getSavedNews = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).populate('savedNews');
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    res.status(200).json({
+      success: true,
+      savedNews: user.savedNews || [],
+    });
+  } catch (error) {
+    console.error('Error fetching saved news:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch saved news', error: error.message });
+  }
+};
+
+exports.toggleSavedNews = async (req, res) => {
+  try {
+    const { newsId } = req.params;
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    user.savedNews = toggleSavedNewsIds(user.savedNews || [], newsId);
+    await user.save();
+
+    const isSaved = user.savedNews.some((id) => String(id) === String(newsId));
+    const news = await News.findById(newsId);
+
+    res.status(200).json({
+      success: true,
+      message: isSaved ? 'News saved' : 'News removed from saved list',
+      saved: isSaved,
+      savedNews: user.savedNews,
+      news,
+    });
+  } catch (error) {
+    console.error('Error toggling saved news:', error);
+    res.status(500).json({ success: false, message: 'Failed to update saved news', error: error.message });
   }
 };
 
