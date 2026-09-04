@@ -561,6 +561,44 @@ exports.getAllTopicsForUser = async (req, res) => {
   }
 };
 
+// Public, read-only content for links shared outside the authenticated feed.
+exports.getPublicNews = async (req, res) => {
+  try {
+    const news = await News.findById(req.params.newsId).lean();
+    if (!news) {
+      return res.status(404).json({ success: false, message: "News not found" });
+    }
+
+    return res.status(200).json({ success: true, data: news });
+  } catch (error) {
+    return res.status(400).json({ success: false, message: "Invalid news link" });
+  }
+};
+
+exports.getPublicTrivia = async (req, res) => {
+  try {
+    const trivia = await Trivia.findById(req.params.triviaId).lean();
+    if (!trivia) {
+      return res.status(404).json({ success: false, message: "Trivia not found" });
+    }
+
+    const card = req.params.cardId
+      ? trivia.subCards.find((item) => String(item._id) === req.params.cardId)
+      : null;
+
+    if (req.params.cardId && !card) {
+      return res.status(404).json({ success: false, message: "Trivia card not found" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: req.params.cardId ? { ...trivia, subCards: [card] } : trivia,
+    });
+  } catch (error) {
+    return res.status(400).json({ success: false, message: "Invalid trivia link" });
+  }
+};
+
 
 //get the news feed 
 exports.getUserFeedCursor = async (req, res) => {

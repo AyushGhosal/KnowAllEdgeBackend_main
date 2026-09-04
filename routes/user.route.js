@@ -1,5 +1,5 @@
 const express = require("express");
-const {getUserScores,getQuizForPlay,submitQuizAnswers,getNewsByTopic,updateProfilePic,editProfile,UserLogin,registerUser,verifyEmail,forgetPassword,resetPassword,updatePassword,setUserTopics,addUserTopics,removeUserTopics,getAllTopicsForUser,getUserFeedCursor,getSavedNews,toggleSavedNews}=require("../controllers/user.controller")
+const {getUserScores,getQuizForPlay,submitQuizAnswers,getNewsByTopic,updateProfilePic,editProfile,UserLogin,registerUser,verifyEmail,forgetPassword,resetPassword,updatePassword,setUserTopics,addUserTopics,removeUserTopics,getAllTopicsForUser,getUserFeedCursor,getSavedNews,toggleSavedNews,getPublicNews,getPublicTrivia}=require("../controllers/user.controller")
 const { userChecker } = require('../middlewares/authentication');
 const router = express.Router();
 const upload = require('../middlewares/upload');
@@ -16,6 +16,11 @@ router.post("/addMoreTopicsLater/:id",addUserTopics)
 router.delete("/deleteTopics/:id",removeUserTopics)
 router.put("/edit/profilePic/:id", upload.single("profilePic"), updateProfilePic);
 router.put("/editProfile/:id", editProfile);
+// Public destinations used by social share links. They intentionally do not
+// require a session, but expose only the selected published content.
+router.get("/public/news/:newsId", getPublicNews);
+router.get("/public/trivia/:triviaId", getPublicTrivia);
+router.get("/public/trivia/:triviaId/cards/:cardId", getPublicTrivia);
 //initial  http://localhost:8080/api/v1/user/feed?limit=20 then GEThttp://localhost:8080/api/v1/user/feed?cursor=2025-09-09T10:37:37.570Z cursor value you will get from "nextCursor" from prev response
 router.get('/feed', userChecker,getUserFeedCursor);
 router.get('/saved-news', userChecker, getSavedNews);
