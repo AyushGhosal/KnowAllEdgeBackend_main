@@ -32,7 +32,7 @@ const {
   addQuizToEvent,
   updateQuiz,
   deleteQuiz,
-  getAllScores,exportQuizScoresToExcel,
+  getAllScores,exportQuizScoresToExcel,getUserActivitySummary,
 } = require("../controllers/superAdmin.controller");
 const { superadminChecker } = require("../middlewares/authentication");
 const upload = require("../middlewares/upload");
@@ -42,6 +42,7 @@ const router = express.Router();
 // Authentication
 router.post("/signup", superAdminPostSignup);
 router.post("/signin", superAdminpostLogin);
+router.get("/user-activity", superadminChecker, getUserActivitySummary);
 router.get("/getAllUsers", superadminChecker, getAllUsers);
 router.get("/exportUserList", exportUsersToExcel);
 router.get("/getUserById/:id", superadminChecker, getUserById);

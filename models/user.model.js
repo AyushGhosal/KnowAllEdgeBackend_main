@@ -68,6 +68,12 @@ const userdetailSchema = new mongoose.Schema(
       },
       is_schoolStudent:{type:Boolean,
         default:false
+      },
+      // A last-seen timestamp works across browser refreshes and API restarts.
+      lastActiveAt: {
+        type: Date,
+        default: null,
+        index: true,
       }
   },
   { timestamps: true }

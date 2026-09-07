@@ -117,6 +117,31 @@ exports.superAdminpostLogin = async (req, res) => {
   }
 };
 
+// Counts are based on authenticated client heartbeats. The default five-minute
+// window means users presently active in the application.
+exports.getUserActivitySummary = async (req, res) => {
+  try {
+    const requestedWindow = Number.parseInt(req.query.windowMinutes, 10);
+    const windowMinutes = Number.isFinite(requestedWindow)
+      ? Math.min(Math.max(requestedWindow, 1), 60)
+      : 5;
+    const now = Date.now();
+    const [activeUsers, dailyActiveUsers, weeklyActiveUsers, registeredUsers] = await Promise.all([
+      User.countDocuments({ lastActiveAt: { $gte: new Date(now - windowMinutes * 60 * 1000) } }),
+      User.countDocuments({ lastActiveAt: { $gte: new Date(now - 24 * 60 * 60 * 1000) } }),
+      User.countDocuments({ lastActiveAt: { $gte: new Date(now - 7 * 24 * 60 * 60 * 1000) } }),
+      User.countDocuments(),
+    ]);
+    return sendSuccess(res, constants.OK, "User activity summary retrieved.", {
+      measuredAt: new Date(now).toISOString(), activeWindowMinutes: windowMinutes,
+      activeUsers, dailyActiveUsers, weeklyActiveUsers, registeredUsers,
+    });
+  } catch (error) {
+    console.error("Error retrieving user activity summary:", error);
+    return sendServerError(res, error.message);
+  }
+};
+
 //view users details  GET /api/superadmin/users?name=John or GET /api/superadmin/users?email=gmail.com or GET /api/superadmin/users?schoolId=66e1a11122cde67890ab1111 or GET /api/superadmin/users?country=India&state=Delhi or GET /api/superadmin/users?name=John&city=Noida&startDate=2025-08-01&endDate=2025-08-31&page=1&limit=5
 exports.getAllUsers = async (req, res) => {
   try {

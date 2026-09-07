@@ -161,6 +161,22 @@ exports.UserLogin = async (req, res) => {
   }
 };
 
+// The signed-in client sends this at a bounded interval while a tab is visible.
+// It is deliberately separate from normal requests so active-user reporting is
+// consistent across all user journeys.
+exports.recordActivity = async (req, res) => {
+  try {
+    await User.updateOne(
+      { _id: req.user._id },
+      { $set: { lastActiveAt: new Date() } }
+    );
+    return res.status(constants.NO_CONTENT).end();
+  } catch (error) {
+    console.error("Error recording user activity:", error);
+    return sendServerError(res, error.message);
+  }
+};
+
 //user email verification
 exports.verifyEmail = async (req, res) => {
   const { email, otp } = req.query;

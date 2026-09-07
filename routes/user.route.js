@@ -1,5 +1,5 @@
 const express = require("express");
-const {getUserScores,getQuizForPlay,submitQuizAnswers,getNewsByTopic,updateProfilePic,editProfile,UserLogin,registerUser,verifyEmail,forgetPassword,resetPassword,updatePassword,setUserTopics,addUserTopics,removeUserTopics,getAllTopicsForUser,getUserFeedCursor,getSavedNews,toggleSavedNews,getPublicNews,getPublicTrivia}=require("../controllers/user.controller")
+const {getUserScores,getQuizForPlay,submitQuizAnswers,getNewsByTopic,updateProfilePic,editProfile,UserLogin,registerUser,verifyEmail,forgetPassword,resetPassword,updatePassword,setUserTopics,addUserTopics,removeUserTopics,getAllTopicsForUser,getUserFeedCursor,getSavedNews,toggleSavedNews,getPublicNews,getPublicTrivia,recordActivity}=require("../controllers/user.controller")
 const { userChecker } = require('../middlewares/authentication');
 const router = express.Router();
 const upload = require('../middlewares/upload');
@@ -10,6 +10,7 @@ router.post("/signin", UserLogin)
 router.post('/verifyemail', verifyEmail)
 router.post('/forgetPassword',forgetPassword)
 router.post('/verifyForgetPasswordOTP',resetPassword)
+router.put('/activity',userChecker,recordActivity)
 router.put('/changePassword',userChecker,updatePassword)
 router.post("/setTopicsFirst/:id",setUserTopics)
 router.post("/addMoreTopicsLater/:id",addUserTopics)
